@@ -48,7 +48,13 @@ module ActiveMongoid
 
     def method_missing(name, *args, &block)
       resp = __target.send(name, *args, &block)
-      if resp == __target_class || (resp.is_a?(ActiveRecord::Relation) && resp.klass == __target_class)
+      if resp.is_a?(ActiveRecord::Relation)
+        if resp.klass == __target_class
+          FinderProxy.new(resp)
+        else
+          resp
+        end
+      elsif resp == __target_class
         FinderProxy.new(resp)
       else
         resp
